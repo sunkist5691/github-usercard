@@ -1,3 +1,5 @@
+import axios from 'axios'
+
 /*
   STEP 1: using axios, send a GET request to the following URL
     (replacing the placeholder with your Github name):
@@ -11,6 +13,7 @@
 
     Skip to STEP 3.
 */
+
 
 /*
   STEP 4: Pass the data received from Github into your function,
@@ -28,7 +31,6 @@
     user, and adding that card to the DOM.
 */
 
-const followersArray = [];
 
 /*
   STEP 3: Create a function that accepts a single object as its only argument.
@@ -49,6 +51,109 @@ const followersArray = [];
       </div>
     </div>
 */
+
+// Fetch data from Github API
+
+const cards = document.querySelector('.cards')
+
+axios
+  .get('https://api.github.com/users/sunkist5691')
+  .then( response => {
+    console.log(response)
+    cards.appendChild(createCard(response.data))
+  })
+
+// Fetch username and push into 'followersArray' (Stretch Goal)
+axios
+  .get('https://api.github.com/users/sunkist5691/followers')
+  .then( response => {
+    const followersArray = [];
+    response.data.forEach( userName => {
+      followersArray.push(userName.login)
+    })
+    // Fetch info using username from 'followersArray'
+    followersArray.forEach( userName => {
+      axios
+        .get(`https://api.github.com/users/${userName}`)
+        .then( response => {
+          console.log(response)
+          cards.appendChild(createCard(response.data))
+        })
+        .catch( error => {
+          console.log('the data has not returned', error)
+        })
+    })
+  })
+  .catch( error => {
+    console.log('the data has not returned', error)
+  })
+
+
+
+//Create component
+function createCard(data) {
+  // Create elements
+  const card = document.createElement('div')
+  const img = document.createElement('img')
+  const cardInfo = document.createElement('div')
+  const name = document.createElement('h3')
+  const userName = document.createElement('p')
+  const location = document.createElement('p')
+  const profile = document.createElement('p')
+  const address = document.createElement('a')
+  const followers = document.createElement('p')
+  const following = document.createElement('p')
+  const bio = document.createElement('p')
+
+  // Add class name
+  card.classList.add('card')
+  cardInfo.classList.add('card-info')
+  name.classList.add('name')
+  userName.classList.add('username')
+
+  // Add info
+  img.src = data.avatar_url
+  name.textContent = data.name
+  userName.textContent = data.login
+
+  if(data.location === null)
+    location.textContent = 'No location has been specified'
+  else
+    location.textContent = data.location
+
+  address.textContent = data.html_url
+  address.href = data.html_url
+  followers.textContent = `${data.followers} followers`
+  following.textContent = `${data.following} following`
+
+  if(data.bio === null)
+    bio.textContent = 'No bio added'
+  else
+    bio.textContent = data.bio
+  
+
+  // Append elements
+  profile.textContent = 'Profile: ' //order matters
+  profile.appendChild(address)
+
+  cardInfo.appendChild(name)
+  cardInfo.appendChild(userName)
+  cardInfo.appendChild(location)
+  cardInfo.appendChild(profile)
+  cardInfo.appendChild(followers)
+  cardInfo.appendChild(following)
+  cardInfo.appendChild(bio)
+
+  card.appendChild(img)
+  card.appendChild(cardInfo)
+
+  return card
+
+}
+
+
+
+
 
 /*
   List of LS Instructors Github username's:
